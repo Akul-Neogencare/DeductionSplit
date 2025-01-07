@@ -11,7 +11,17 @@ input_file = os.path.join(current_directory, "Excel_input/Master.xlsx")
 
 
 def opening():
-    global input_file
+    global input_file, current_directory
+    folder_path = os.path.join(current_directory, "Excel_output")
+    if os.listdir(folder_path):
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(f'Failed to delete {file_path}. Reason: {e}')
+
     df = pd.read_excel(input_file)
     grouped = df.groupby("Employee ID")
     count = len(grouped)
@@ -149,3 +159,6 @@ def split():
         output_file = os.path.join(current_directory, f"Excel_output/Employee_{employee_id}.xlsx")
         wb.save(output_file)
         print(f"The Created file: {output_file}")
+
+
+# opening()
