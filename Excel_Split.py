@@ -1,16 +1,25 @@
 import os
-
 import pandas as pd
 from openpyxl import Workbook
 from datetime import datetime
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 
+# Load the main Excel file
+current_directory = os.path.dirname(os.path.abspath(__file__))
+input_file = os.path.join(current_directory, "Excel_input/Master.xlsx")
+
+
+def opening():
+    global input_file
+    df = pd.read_excel(input_file)
+    grouped = df.groupby("Employee ID")
+    count = len(grouped)
+    return count
+
 
 def split():
-    # Load the main Excel file
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    input_file = os.path.join(current_directory, "Excel_input/Master.xlsx")
+    global input_file
     # input_file = "Excel_input/Master.xlsx"
     df = pd.read_excel(input_file)
 
