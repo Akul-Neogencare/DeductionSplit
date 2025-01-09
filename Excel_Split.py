@@ -153,7 +153,6 @@ def split():
             cell.font = total_font
             cell.fill = total_fill
 
-        # fff2cc
         # Save the individual file
 
         output_file = os.path.join(current_directory, f"Excel_output/Employee_{employee_id}.xlsx")
