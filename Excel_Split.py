@@ -74,94 +74,97 @@ def split():
         rows_to_add = []
         sum_row = {}
         print(date_columns)
+        try:
+            for _, row in group.iterrows():
+                # Split date-related columns and handle multiple rows
+                max_splits = 1
+                split_data = {col: [] for col in date_columns}
+                print(split_data)
 
-        for _, row in group.iterrows():
-            # Split date-related columns and handle multiple rows
-            max_splits = 1
-            split_data = {col: [] for col in date_columns}
-            print(split_data)
+                for col in date_columns:
+                    print("Col ", col)
+                    if pd.isna(row[col]):
+                        split_data[col] = [""]
+                    else:
+                        split_values = [x.strip() for x in str(row[col]).split(",")]
+                        print("spl ", len(split_values))
+                        if len(split_values) < 2:
+                            split_values = [datetime.strptime(split_values[0], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")]
 
-            for col in date_columns:
-                print("Col ", col)
-                if pd.isna(row[col]):
-                    split_data[col] = [""]
+                        split_data[col] = split_values
+                        max_splits = max(max_splits, len(split_values))
+                print(max_splits)
+                print(split_data)
+
+                # for col in date_columns:
+                #     sums = len(split_data[col])
+
+                sum_row = {col: (len(split_data[col]) if split_data[col][0] != "" else "") for col in date_columns}
+                # print(sums)
+                print(sum_row)
+                rows_to_add.append(sum_row)
+                # Construct rows based on splits
+                for i in range(max_splits):
+                    new_row = {col: (split_data[col][i] if i < len(split_data[col]) else "") for col in date_columns}
+                    print("new r ", new_row)
+                    rows_to_add.append(new_row)
+                print(rows_to_add)
+                print(len(rows_to_add))
+            # Add the split rows starting from the third row (same row as Employee ID and Name)
+            for idx, row in enumerate(rows_to_add):
+                print("ind", idx)
+                print(row)
+                if idx == 0:
+                    # ws.cell(row=1, column=1, value="Total")
+                    # ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=1)
+                    for col_idx, col in enumerate(date_columns, start=3):  # Start from Column 3
+                        ws.cell(row=2, column=col_idx, value=row.get(col, ""))
+                elif idx == 1:
+                    # Merge date data with the Employee ID and Name for the first row
+                    ws.append([employee_row[0], employee_row[1]] + [row.get(col, "") for col in date_columns])
                 else:
-                    split_values = [x.strip() for x in str(row[col]).split(",")]
-                    print("spl ", len(split_values))
-                    if len(split_values) < 2:
-                        split_values = [datetime.strptime(split_values[0], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")]
+                    # Add only date data for subsequent rows
+                    ws.append(["", ""] + [row.get(col, "") for col in date_columns])
 
-                    split_data[col] = split_values
-                    max_splits = max(max_splits, len(split_values))
-            print(max_splits)
-            print(split_data)
+            for col in ws.columns:
+                max_length = 0
+                column_letter = get_column_letter(col[0].column)  # Get column letter (e.g., A, B, C)
 
-            # for col in date_columns:
-            #     sums = len(split_data[col])
+                for cell in col:
+                    try:
+                        # Measure cell content length
+                        if cell.value:
+                            max_length = max(max_length, len(str(cell.value)))
+                    except:
+                        pass
 
-            sum_row = {col: (len(split_data[col]) if split_data[col][0] != "" else "") for col in date_columns}
-            # print(sums)
-            print(sum_row)
-            rows_to_add.append(sum_row)
-            # Construct rows based on splits
-            for i in range(max_splits):
-                new_row = {col: (split_data[col][i] if i < len(split_data[col]) else "") for col in date_columns}
-                print("new r ", new_row)
-                rows_to_add.append(new_row)
-            print(rows_to_add)
-            print(len(rows_to_add))
-        # Add the split rows starting from the third row (same row as Employee ID and Name)
-        for idx, row in enumerate(rows_to_add):
-            print("ind", idx)
-            print(row)
-            if idx == 0:
-                # ws.cell(row=1, column=1, value="Total")
-                # ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=1)
-                for col_idx, col in enumerate(date_columns, start=3):  # Start from Column 3
-                    ws.cell(row=2, column=col_idx, value=row.get(col, ""))
-            elif idx == 1:
-                # Merge date data with the Employee ID and Name for the first row
-                ws.append([employee_row[0], employee_row[1]] + [row.get(col, "") for col in date_columns])
-            else:
-                # Add only date data for subsequent rows
-                ws.append(["", ""] + [row.get(col, "") for col in date_columns])
+                adjusted_width = max_length + 2  # Add some extra padding
+                ws.column_dimensions[column_letter].width = adjusted_width
 
-        for col in ws.columns:
-            max_length = 0
-            column_letter = get_column_letter(col[0].column)  # Get column letter (e.g., A, B, C)
+            for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=len(headers)):
+                for cell in row:
+                    cell.border = thin_border
+                    cell.alignment = alignment_center
 
-            for cell in col:
-                try:
-                    # Measure cell content length
-                    if cell.value:
-                        max_length = max(max_length, len(str(cell.value)))
-                except:
-                    pass
+            for col_idx, cell in enumerate(ws[1], start=1):  # ws[1] represents the first row
+                cell.font = header_font
+                cell.fill = header_fill
 
-            adjusted_width = max_length + 2  # Add some extra padding
-            ws.column_dimensions[column_letter].width = adjusted_width
+            for col_idx, cell in enumerate(ws[2], start=3):
+                cell.font = total_font
+                cell.fill = total_fill
 
-        for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=len(headers)):
-            for cell in row:
-                cell.border = thin_border
-                cell.alignment = alignment_center
+            # Save the individual file
 
-        for col_idx, cell in enumerate(ws[1], start=1):  # ws[1] represents the first row
-            cell.font = header_font
-            cell.fill = header_fill
+            output_file = os.path.join(current_directory, f"Excel_output/Employee_{employee_id}.xlsx")
+            wb.save(output_file)
+            print(f"The Created file: {output_file}")
+            completed += 1
 
-        for col_idx, cell in enumerate(ws[2], start=3):
-            cell.font = total_font
-            cell.fill = total_fill
+            output += f"File Created For: Employee_{employee_id}.xlsx\n"
+        except Exception as E:
+            output += f"Error: {E}"
 
-        # Save the individual file
-
-        output_file = os.path.join(current_directory, f"Excel_output/Employee_{employee_id}.xlsx")
-        wb.save(output_file)
-        print(f"The Created file: {output_file}")
-        completed += 1
-
-        output += f"File Created For: Employee_{employee_id}.xlsx\n"
     print(output)
     return [output, completed]
 
