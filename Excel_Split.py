@@ -159,8 +159,9 @@ def split():
         wb.save(output_file)
         print(f"The Created file: {output_file}")
 
-        output += f"The Created file: Employee_{employee_id}.xlsx"
+        output += f"The Created file: Employee_{employee_id}.xlsx\n"
+    print(output)
     return output
 
 
-# opening()
+# split()
