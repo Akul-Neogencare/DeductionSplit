@@ -32,7 +32,7 @@ def split():
     global input_file
     # input_file = "Excel_input/Master.xlsx"
     df = pd.read_excel(input_file)
-
+    output = ''
     # Group the data by Employee ID
     grouped = df.groupby("Employee ID")
 
@@ -158,7 +158,9 @@ def split():
         output_file = os.path.join(current_directory, f"Excel_output/Employee_{employee_id}.xlsx")
         wb.save(output_file)
         print(f"The Created file: {output_file}")
-        return f"File Created for: {output_file}"
+
+        output += f"The Created file: Employee_{employee_id}.xlsx"
+    return output
 
 
 # opening()
