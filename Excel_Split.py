@@ -25,6 +25,7 @@ def opening():
     df = pd.read_excel(input_file)
     grouped = df.groupby("Employee ID")
     count = len(grouped)
+    print(count)
     return count
 
 
@@ -169,4 +170,4 @@ def split():
     return [output, completed]
 
 
-# split()
+# opening()
