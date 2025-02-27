@@ -74,47 +74,47 @@ def split():
         date_columns = [col for col in group.columns if col not in ["Employee ID", "Name"]]
         rows_to_add = []
         sum_row = {}
-        print(date_columns)
+        # print(date_columns)
         try:
             for _, row in group.iterrows():
                 # Split date-related columns and handle multiple rows
                 max_splits = 1
                 split_data = {col: [] for col in date_columns}
-                print(split_data)
+                # print(split_data)
 
                 for col in date_columns:
-                    print("Col ", col)
+                    # print("Col ", col)
                     if pd.isna(row[col]):
                         split_data[col] = [""]
                     else:
                         split_values = [x.strip() for x in str(row[col]).split(",")]
-                        print("spl ", len(split_values))
+                        # print("spl ", len(split_values))
                         if len(split_values) < 2:
                             split_values = [datetime.strptime(split_values[0], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y")]
 
                         split_data[col] = split_values
                         max_splits = max(max_splits, len(split_values))
-                print(max_splits)
-                print(split_data)
+                # print(max_splits)
+                # print(split_data)
 
                 # for col in date_columns:
                 #     sums = len(split_data[col])
 
                 sum_row = {col: (len(split_data[col]) if split_data[col][0] != "" else "") for col in date_columns}
                 # print(sums)
-                print(sum_row)
+                # print(sum_row)
                 rows_to_add.append(sum_row)
                 # Construct rows based on splits
                 for i in range(max_splits):
                     new_row = {col: (split_data[col][i] if i < len(split_data[col]) else "") for col in date_columns}
-                    print("new r ", new_row)
+                    # print("new r ", new_row)
                     rows_to_add.append(new_row)
-                print(rows_to_add)
-                print(len(rows_to_add))
+                # print(rows_to_add)
+                # print(len(rows_to_add))
             # Add the split rows starting from the third row (same row as Employee ID and Name)
             for idx, row in enumerate(rows_to_add):
-                print("ind", idx)
-                print(row)
+                # print("ind", idx)
+                # print(row)
                 if idx == 0:
                     # ws.cell(row=1, column=1, value="Total")
                     # ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=1)
